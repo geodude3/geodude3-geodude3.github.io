@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Currency Exchange</title>
+        <script>
+            document.addEventListener('DOMContentLoaded', ()=>{
+
+                
+                fetch('https://api.exchangerate.host/latest/')
+                .then(response => response.json())
+                .then(data => {
+
+                    rates = Object.keys(data.rates);
+
+                    for (rate=0; rate<rates.length; rate++){
+                        const option = document.createElement('option');
+                        const option2 = document.createElement('option');
+                        option.innerHTML = rates[rate];
+                        option.value = rates[rate];
+                        option2.innerHTML = rates[rate];
+                        option2.value = rates[rate];
+                        document.querySelector('#base_form').appendChild(option);
+                        document.querySelector('#currency_form').appendChild(option2);
+                    }
+                })
+                .catch(error => {
+                    console.log('Error:', error);
+                })
+
+                var latest;
+                
+                document.querySelector('#base_val').onsubmit = () => {
+                    latest = 2;
+                    computeRate(latest);
+                    console.log('computed')
+
+                    return false; 
+                }
+                document.querySelector('#currency_val').onsubmit = () => {
+                    latest = 3;
+                    computeRate(latest);
+                    console.log('computed')
+
+                    return false; 
+                }
+
+                document.querySelector('#base_form').onchange = () => {
+                    computeRate(latest);
+                }
+                document.querySelector('#currency_form').onchange = () => {
+                    computeRate(latest);
+                }
+
+                function computeRate(latest){
+                    const currency = document.querySelector('#currency_form').value;
+                    const base = document.querySelector('#base_form').value;
+
+                    fetch(`https://api.exchangerate.host/latest?base=${base}#/`)
+                    .then(response => response.json())
+                    .then(data => {
+
+                        const currentRate = data.rates[currency];
+                        let base_value = document.querySelector('#base_nbr').value;
+                        let currency_value = document.querySelector('#currency_nbr').value;
+
+                        if (!base_value){base_value = 0;}
+
+                        let final;
+                        if(latest === 2){
+                            final = base_value * currentRate;
+                            
+                            document.querySelector('#result').innerHTML = `${base_value} ${base} = ${final.toFixed(2)} ${currency}`;
+                            document.querySelector('#currency_nbr').value = final.toFixed(2);
+                        }   
+                        if(latest === 3){
+                            final = currency_value / currentRate; 
+                            document.querySelector('#result').innerHTML = `${currency_value} ${currency} = ${final.toFixed(2)} ${base}`;
+                            document.querySelector('#base_nbr').value = final.toFixed(2);
+                        }
+
+                    })
+                }
+                            
+            })
+
+        </script>  
+        <style>
+            #dropdown{
+                display: inline-block;
+                display: flex;
+            }
+            #arrow{
+                margin-left: 20px;
+                margin-right: 20px;
+            }
+            #result{
+                margin-top: 20px;
+            }
+
+        </style>
+    </head>
+    <body>
+        <h1>Currency Exchange - Input base and target currency.</h1>
+        <div id="dropdown">
+            <form id="base_val">
+                <input type="text" id="base_nbr">
+                <select id="base_form"></select>
+                <input type="submit" id="submit" value="Convert">
+            </form>
+            <div id="arrow"> ==></div>
+            <form id="currency_val">
+                <input type="text" id="currency_nbr">
+                <select id="currency_form"></select>
+                <input type="submit" id="submit" value="Convert">
+            </form>
+           
+        </div>  
+        <div id="result">
+            
+        </div>
+    </body>
+</html>
